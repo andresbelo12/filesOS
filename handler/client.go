@@ -22,17 +22,18 @@ func (listener ClientListener) ProcessMessage(processorTools interface{}, connec
 
 	if err = logSystem.WriteLog(message.Destination, model.MessageToLog(message)); err != nil {
 		fmt.Println(err)
-		return
+	}
+
+	if err = logSystem.WriteLog(message.Source, model.MessageToLog(message)); err != nil {
+		fmt.Println(err)
 	}
 
 	if messageBody[0] == "create" {
-		actionCreate(processorTools, *conn, message)
-		return
+		err = actionCreate(processorTools, *conn, message)
 	}
 
 	if messageBody[0] == "delete" {
-		actionDelete(processorTools, *conn, message)
-		return
+		err = actionDelete(processorTools, *conn, message)
 	}
 
 	return
@@ -46,7 +47,7 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 		Command:     kernelModel.CMD_SEND,
 		Source:      kernelModel.MD_FILES,
 		Destination: message.Source,
-		Message:     "response:true,File: " + messageBody[1] + " not created reason: ",
+		Message:     "response:false;File " + messageBody[1] + " not created reason: ",
 	}
 
 	if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to create folder: "+messageBody[1])); err != nil {
@@ -71,7 +72,7 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 			Command:     kernelModel.CMD_SEND,
 			Source:      kernelModel.MD_FILES,
 			Destination: message.Source,
-			Message:     "response:true,File: " + messageBody[1] + " created",
+			Message:     "response:true;File: " + messageBody[1] + " created",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
 			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
@@ -102,7 +103,7 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 		Command:     kernelModel.CMD_SEND,
 		Source:      kernelModel.MD_FILES,
 		Destination: message.Source,
-		Message:     "response:true,File: " + messageBody[1] + " not deleted reason: ",
+		Message:     "response:false;File " + messageBody[1] + " not deleted reason: ",
 	}
 
 	if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to delete folder: "+messageBody[1])); err != nil {
@@ -127,7 +128,7 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 			Command:     kernelModel.CMD_SEND,
 			Source:      kernelModel.MD_FILES,
 			Destination: message.Source,
-			Message:     "response:true,File: " + messageBody[1] + " deleted",
+			Message:     "response:true;File " + messageBody[1] + " deleted",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
 			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {

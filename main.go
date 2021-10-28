@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	kernelHandler "github.com/andresbelo12/KernelOS/handler"
 	kernelModel "github.com/andresbelo12/KernelOS/model"
@@ -18,6 +16,7 @@ const (
 func main() {
 
 	logSystem := handler.CreateLogSystem()
+	listener := handler.CreateListener()
 
 	err := logSystem.InitLogSystem()
 	if err != nil {
@@ -26,32 +25,23 @@ func main() {
 	}
 
 	connection := connectToServer(&logSystem)
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
-		fmt.Print(text)
-
-		a := kernelModel.Message{Source: "name", Command: "nasdkasda"}
-		//fmt.Fprintf(connection, text+"\n")
-		(*connection.ServerConnection).Write(a.ToJson())
-
-		/*message := handler.ReadMessage(&connection)
-		fmt.Println(message)*/
-
-	}
+	kernelHandler.ListenServer(&logSystem, listener, &connection)
 
 }
 
 func connectToServer(logSystem *handler.LogSystem) (connection kernelModel.ClientConnection) {
 	connection = kernelModel.ClientConnection{ServerHost: LOCALHOST, ServerPort: SERVER_PORT}
-	if err := kernelHandler.EstablishClient(&connection, kernelModel.Message{Source: kernelModel.MD_FILES, Destination: "KERNEL", Command: kernelModel.CMD_START, Message: "Listening"}); err != nil {
+	firstMessage := kernelModel.Message{
+		Source: kernelModel.MD_FILES, 
+		Destination: kernelModel.MD_KERNEL, 
+		Command: kernelModel.CMD_START, 
+		Message: "listening",
+	}
+
+	if err := kernelHandler.EstablishClient(&connection, firstMessage); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	listener := handler.CreateListener()
-
-	go kernelHandler.ListenServer(logSystem, listener, &connection)
 	return
 }
