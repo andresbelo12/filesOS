@@ -16,7 +16,7 @@ const (
 func main() {
 
 	logSystem := handler.CreateLogSystem()
-	listener := handler.CreateListener()
+	listener := handler.CreateListener(&logSystem)
 
 	err := logSystem.InitLogSystem()
 	if err != nil {
@@ -24,12 +24,12 @@ func main() {
 		return
 	}
 
-	connection := connectToServer(&logSystem)
-	kernelHandler.ListenServer(&logSystem, listener, &connection)
+	connection := connectToServer()
+	kernelHandler.ListenServer(listener, &connection)
 
 }
 
-func connectToServer(logSystem *handler.LogSystem) (connection kernelModel.ClientConnection) {
+func connectToServer() (connection kernelModel.ClientConnection) {
 	connection = kernelModel.ClientConnection{ServerHost: LOCALHOST, ServerPort: SERVER_PORT}
 	firstMessage := kernelModel.Message{
 		Source: kernelModel.MD_FILES, 

@@ -9,38 +9,39 @@ import (
 	"github.com/andresbelo12/fileOS/model"
 )
 
-type ClientListener struct{}
-
-func CreateListener() kernelModel.CommunicationListener {
-	return ClientListener{}
+type ClientListener struct {
+	LogSystem *LogSystem
 }
 
-func (listener ClientListener) ProcessMessage(processorTools interface{}, connection interface{}, message *kernelModel.Message) (err error) {
-	logSystem := processorTools.(*LogSystem)
+func CreateListener(logSystem *LogSystem) kernelModel.CommunicationListener {
+	return ClientListener{LogSystem: logSystem}
+}
+
+func (listener ClientListener) ProcessMessage(connection interface{}, message *kernelModel.Message) (err error) {
+
 	messageBody := strings.Split(message.Message, ":")
 	conn := connection.(**kernelModel.ClientConnection)
 
-	if err = logSystem.WriteLog(message.Destination, model.MessageToLog(message)); err != nil {
+	if err = listener.LogSystem.WriteLog(message.Destination, model.MessageToLog(message)); err != nil {
 		fmt.Println(err)
 	}
 
-	if err = logSystem.WriteLog(message.Source, model.MessageToLog(message)); err != nil {
+	if err = listener.LogSystem.WriteLog(message.Source, model.MessageToLog(message)); err != nil {
 		fmt.Println(err)
 	}
 
 	if messageBody[0] == "create" {
-		err = actionCreate(processorTools, *conn, message)
+		err = listener.actionCreate(*conn, message)
 	}
 
 	if messageBody[0] == "delete" {
-		err = actionDelete(processorTools, *conn, message)
+		err = listener.actionDelete(*conn, message)
 	}
 
 	return
 }
 
-func actionCreate(processorTools interface{}, connection *kernelModel.ClientConnection, message *kernelModel.Message) (err error) {
-	logSystem := processorTools.(*LogSystem)
+func (listener ClientListener) actionCreate(connection *kernelModel.ClientConnection, message *kernelModel.Message) (err error) {
 	messageBody := strings.Split(message.Message, ":")
 
 	failureMessage := kernelModel.Message{
@@ -50,11 +51,11 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 		Message:     "response:false;File " + messageBody[1] + " not created reason: ",
 	}
 
-	if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to create folder: "+messageBody[1])); err != nil {
+	if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to create folder: "+messageBody[1])); err != nil {
 		fmt.Println(err)
 		failureMessage.Message += err.Error()
 		if err = kernelHandler.WriteServer(connection, &failureMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 				return
 			}
@@ -62,9 +63,9 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 		return
 	}
 
-	if operationResponse := logSystem.CreateFolder(messageBody[1]); operationResponse.Success {
+	if operationResponse := listener.LogSystem.CreateFolder(messageBody[1]); operationResponse.Success {
 
-		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully created folder: "+messageBody[1])); err != nil {
+		if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully created folder: "+messageBody[1])); err != nil {
 			fmt.Println(err)
 		}
 
@@ -75,19 +76,19 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 			Message:     "response:true;File: " + messageBody[1] + " created",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 			}
 		}
 	} else {
 		failureMessage.Message += operationResponse.Message
 		if err = kernelHandler.WriteServer(connection, &failureMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 			}
 		}
 
-		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager failed at create folder: "+messageBody[1]+" reason: "+operationResponse.Message)); err != nil {
+		if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager failed at create folder: "+messageBody[1]+" reason: "+operationResponse.Message)); err != nil {
 			fmt.Println(err)
 		}
 	}
@@ -95,8 +96,7 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 	return
 }
 
-func actionDelete(processorTools interface{}, connection *kernelModel.ClientConnection, message *kernelModel.Message) (err error) {
-	logSystem := processorTools.(*LogSystem)
+func (listener ClientListener) actionDelete(connection *kernelModel.ClientConnection, message *kernelModel.Message) (err error) {
 	messageBody := strings.Split(message.Message, ":")
 
 	failureMessage := kernelModel.Message{
@@ -106,11 +106,11 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 		Message:     "response:false;File " + messageBody[1] + " not deleted reason: ",
 	}
 
-	if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to delete folder: "+messageBody[1])); err != nil {
+	if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to delete folder: "+messageBody[1])); err != nil {
 		fmt.Println(err)
 		failureMessage.Message += err.Error()
 		if err = kernelHandler.WriteServer(connection, &failureMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 				return
 			}
@@ -118,9 +118,9 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 		return
 	}
 
-	if operationResponse := logSystem.DeleteFolder(messageBody[1]); operationResponse.Success {
+	if operationResponse := listener.LogSystem.DeleteFolder(messageBody[1]); operationResponse.Success {
 
-		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully deleted folder: "+messageBody[1])); err != nil {
+		if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully deleted folder: "+messageBody[1])); err != nil {
 			fmt.Println(err)
 		}
 
@@ -131,19 +131,19 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 			Message:     "response:true;File " + messageBody[1] + " deleted",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 			}
 		}
 	} else {
 		failureMessage.Message += operationResponse.Message
 		if err = kernelHandler.WriteServer(connection, &failureMessage); err != nil {
-			if err = logSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
+			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
 				fmt.Println(err)
 			}
 		}
 
-		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager failed at delete folder: "+messageBody[1]+" reason: "+operationResponse.Message)); err != nil {
+		if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager failed at delete folder: "+messageBody[1]+" reason: "+operationResponse.Message)); err != nil {
 			fmt.Println(err)
 		}
 	}
