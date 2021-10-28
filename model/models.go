@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/andresbelo12/KernelOS/model"
+)
 
 const(
 	timeLayout = "02-Jan-2006 15:04:05"
@@ -24,9 +28,15 @@ func OperationResponseToLog(operationResponse *OperationResponse)(log Log){
 	return
 }
 
-func CreateLog(message string)(log Log){
+func StringToLog(message string)(log Log){
 	log.Datetime = time.Now()
 	log.Message = message
+	return
+}
+
+func MessageToLog(message *model.Message)(log Log){
+	log.Datetime = time.Now()
+	log.Message = "Module " + message.Source + " sent message of type " + message.Command + " to module: " + message.Destination + " message: " + message.Message
 	return
 }
 

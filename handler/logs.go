@@ -3,55 +3,66 @@ package handler
 import (
 	"os"
 
+	kernelModel "github.com/andresbelo12/KernelOS/model"
 	"github.com/andresbelo12/fileOS/model"
-)
-
-const(
-	MD_GUI = "GUI"
-	MD_KERNEL = "Kernel"
-	MD_FILES = "FileManager"
 )
 
 type LogSystem struct {
 	WorkspacePath string
-	ModuleFiles map[string]*os.File
-	
+	ModuleFiles   map[string]*os.File
 }
 
-func CreateLogSystem()(logSystem LogSystem) { 
-	logSystem.WorkspacePath = DefaultWorkspacePath 
+func CreateLogSystem() (logSystem LogSystem) {
+	logSystem.WorkspacePath = DefaultWorkspacePath
 	logSystem.ModuleFiles = make(map[string]*os.File)
 	return
 }
 
 func (logSystem LogSystem) InitLogSystem() (err error) {
 	firstLog := model.OperationResponseToLog(logSystem.CreateDefaultWorkspace())
-	err = logSystem.CreateLogFiles(firstLog)
+	err = logSystem.CreateLogFiles(firstLog, "init")
 	return
 
 }
 
-func (logSystem LogSystem) CreateLogFiles(firstLog model.Log)(err error){
-	var modules = [3]string{MD_GUI,MD_FILES,MD_KERNEL}
+func (logSystem LogSystem) CreateLogFiles(firstLog model.Log, action string) (err error) {
+	var modules = [3]string{kernelModel.MD_GUI, kernelModel.MD_FILES, kernelModel.MD_KERNEL}
 
-	for _, module := range(modules){
-		moduleFilePath := logSystem.WorkspacePath + "/" + module + ".txt"
+	for _, module := range modules {
+		moduleFilePath := logSystem.WorkspacePath + "/" + module + "_LOGS.txt"
 		moduleFile, err := os.OpenFile(moduleFilePath, os.O_RDONLY|os.O_CREATE, 0666)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 
-		if module == MD_FILES{
+		logSystem.ModuleFiles[module] = moduleFile
+
+		if action == "init"{
+			if module == kernelModel.MD_FILES {
+				moduleFile.WriteString(firstLog.ToString())
+			}
+
+			moduleFile.WriteString(model.StringToLog(module + " file created at default workspace: " + logSystem.WorkspacePath).ToString())
+			if module == kernelModel.MD_KERNEL {
+				moduleFile.WriteString(model.StringToLog("Kernel is initializing all modules").ToString())
+			}
+		}
+
+		if action == "create"{
 			moduleFile.WriteString(firstLog.ToString())
-		}
-
-		moduleFile.WriteString(model.CreateLog(module + " file created at default workspace: " + logSystem.WorkspacePath).ToString())
-
-		if module == MD_KERNEL{
-			moduleFile.WriteString(model.CreateLog("Kernel is initializing all modules").ToString())
+			moduleFile.WriteString(model.StringToLog(module + " file created at new workspace: " + logSystem.WorkspacePath).ToString())
 		}
 		
-		
+		if action == "delete"{
+			moduleFile.WriteString(firstLog.ToString())
+			moduleFile.WriteString(model.StringToLog("Deleted old workspace, set " + logSystem.WorkspacePath + " as default workspace again").ToString())
+		}
+
 	}
+	return
+}
+
+func (logSystem LogSystem) WriteLog(fileName string, log model.Log) (err error) {
+	_, err = logSystem.ModuleFiles[fileName].WriteString(log.ToString())
 	return
 }

@@ -1,2 +1,8 @@
-github.com/andresbelo12/KernelOS v0.0.1 h1:7ahCZOY3siVR45zGdpZMFYUs7gavyzLV6GJ7OTEhZ7c=
-github.com/andresbelo12/KernelOS v0.0.1/go.mod h1:3wpTCH6YNd4xRAoGlJAvSlkAt3C7fjPPFvN1tCvNN94=
+github.com/andresbelo12/KernelOS v0.0.5 h1:IalM0ooDtWLOkKgFsz+BHcmg0P779HjYs0Jj4PA6bJw=
+github.com/andresbelo12/KernelOS v0.0.5/go.mod h1:3wpTCH6YNd4xRAoGlJAvSlkAt3C7fjPPFvN1tCvNN94=
+github.com/andresbelo12/KernelOS v0.0.6 h1:sU9CB194HuAgVA7z/bal7bFkIGjNZunKHY957y4pDrw=
+github.com/andresbelo12/KernelOS v0.0.6/go.mod h1:3wpTCH6YNd4xRAoGlJAvSlkAt3C7fjPPFvN1tCvNN94=
+github.com/andresbelo12/KernelOS v0.0.7 h1:nU4Ra/SzsnMQvC+jHPhASXK5IYdVJ4IhnPJkaZFe2mI=
+github.com/andresbelo12/KernelOS v0.0.7/go.mod h1:3wpTCH6YNd4xRAoGlJAvSlkAt3C7fjPPFvN1tCvNN94=
+github.com/andresbelo12/KernelOS v0.0.8 h1:hfcx9LzLfFdjjuYmGFXP93XKDDlnhnSCbgSfiLC02yg=
+github.com/andresbelo12/KernelOS v0.0.8/go.mod h1:3wpTCH6YNd4xRAoGlJAvSlkAt3C7fjPPFvN1tCvNN94=
