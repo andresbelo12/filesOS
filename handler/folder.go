@@ -11,7 +11,7 @@ const (
 	PERMISSIONS          = 0700
 )
 
-func (logSystem *LogSystem) CreateFolder(folderName string, firstLog model.Log) *model.OperationResponse {
+func (logSystem *LogSystem) CreateFolder(folderName string) *model.OperationResponse {
 	folderPath := DefaultWorkspacePath + "/" + folderName
 	response := model.OperationResponse{}
 
@@ -23,7 +23,6 @@ func (logSystem *LogSystem) CreateFolder(folderName string, firstLog model.Log) 
 			response.Message = "Create folder " + folderName + " successful"
 			response.Success = true
 			logSystem.WorkspacePath = folderPath
-			logSystem.CreateLogFiles(firstLog, "create")
 		}
 	} else {
 		response.Message = "Create folder " + folderName + " failed because already exists "
@@ -33,7 +32,7 @@ func (logSystem *LogSystem) CreateFolder(folderName string, firstLog model.Log) 
 	return &response
 }
 
-func (logSystem *LogSystem) DeleteFolder(folderName string, firstLog model.Log) *model.OperationResponse {
+func (logSystem *LogSystem) DeleteFolder(folderName string) *model.OperationResponse {
 	folderPath := DefaultWorkspacePath + "/" + folderName
 	response := model.OperationResponse{}
 

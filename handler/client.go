@@ -61,8 +61,7 @@ func actionCreate(processorTools interface{}, connection *kernelModel.ClientConn
 		return
 	}
 
-	firstLog := model.StringToLog("Module: " + message.Source + " created new folder: " + messageBody[1])
-	if operationResponse := logSystem.CreateFolder(messageBody[1], firstLog); operationResponse.Success {
+	if operationResponse := logSystem.CreateFolder(messageBody[1]); operationResponse.Success {
 
 		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully created folder: "+messageBody[1])); err != nil {
 			fmt.Println(err)
@@ -118,9 +117,7 @@ func actionDelete(processorTools interface{}, connection *kernelModel.ClientConn
 		return
 	}
 
-	firstLog := model.StringToLog("Module: " + message.Source + " deleted folder: " + messageBody[1] + " and all its content")
-	logSystem.CreateLogFiles(firstLog, "delete")
-	if operationResponse := logSystem.DeleteFolder(messageBody[1], firstLog); operationResponse.Success {
+	if operationResponse := logSystem.DeleteFolder(messageBody[1]); operationResponse.Success {
 
 		if err = logSystem.WriteLog(message.Destination, model.StringToLog("File manager succesfully deleted folder: "+messageBody[1])); err != nil {
 			fmt.Println(err)

@@ -20,12 +20,12 @@ func CreateLogSystem() (logSystem LogSystem) {
 
 func (logSystem LogSystem) InitLogSystem() (err error) {
 	firstLog := model.OperationResponseToLog(logSystem.CreateDefaultWorkspace())
-	err = logSystem.CreateLogFiles(firstLog, "init")
+	err = logSystem.CreateLogFiles(firstLog)
 	return
 
 }
 
-func (logSystem LogSystem) CreateLogFiles(firstLog model.Log, action string) (err error) {
+func (logSystem LogSystem) CreateLogFiles(firstLog model.Log) (err error) {
 	var modules = [3]string{kernelModel.MD_GUI, kernelModel.MD_FILES, kernelModel.MD_KERNEL}
 
 	for _, module := range modules {
@@ -37,25 +37,14 @@ func (logSystem LogSystem) CreateLogFiles(firstLog model.Log, action string) (er
 
 		logSystem.ModuleFiles[module] = moduleFile
 
-		if action == "init"{
-			if module == kernelModel.MD_FILES {
-				moduleFile.WriteString(firstLog.ToString())
-			}
-
-			moduleFile.WriteString(model.StringToLog(module + " file created at default workspace: " + logSystem.WorkspacePath).ToString())
-			if module == kernelModel.MD_KERNEL {
-				moduleFile.WriteString(model.StringToLog("Kernel is initializing all modules").ToString())
-			}
+		if module == kernelModel.MD_FILES {
+			moduleFile.WriteString(firstLog.ToString())
 		}
 
-		if action == "create"{
-			moduleFile.WriteString(firstLog.ToString())
-			moduleFile.WriteString(model.StringToLog(module + " file created at new workspace: " + logSystem.WorkspacePath).ToString())
-		}
-		
-		if action == "delete"{
-			moduleFile.WriteString(firstLog.ToString())
-			moduleFile.WriteString(model.StringToLog("Deleted old workspace, set " + logSystem.WorkspacePath + " as default workspace again").ToString())
+		moduleFile.WriteString(model.StringToLog(module + " file created at default workspace: " + logSystem.WorkspacePath).ToString())
+
+		if module == kernelModel.MD_KERNEL {
+			moduleFile.WriteString(model.StringToLog("Kernel is initializing all modules").ToString())
 		}
 
 	}
