@@ -48,7 +48,7 @@ func (listener ClientListener) actionCreate(connection *kernelModel.ClientConnec
 		Command:     kernelModel.CMD_SEND,
 		Source:      kernelModel.MD_FILES,
 		Destination: message.Source,
-		Message:     "response:false;File " + messageBody[1] + " not created reason: ",
+		Message:     "response:false;operation:create;message:Directory " + messageBody[1] + " not created reason: ",
 	}
 
 	if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to create folder: "+messageBody[1])); err != nil {
@@ -73,7 +73,7 @@ func (listener ClientListener) actionCreate(connection *kernelModel.ClientConnec
 			Command:     kernelModel.CMD_SEND,
 			Source:      kernelModel.MD_FILES,
 			Destination: message.Source,
-			Message:     "response:true;File: " + messageBody[1] + " created",
+			Message:     "response:true;operation:create;message:Directory " + messageBody[1] + " created",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
 			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
@@ -103,7 +103,7 @@ func (listener ClientListener) actionDelete(connection *kernelModel.ClientConnec
 		Command:     kernelModel.CMD_SEND,
 		Source:      kernelModel.MD_FILES,
 		Destination: message.Source,
-		Message:     "response:false;File " + messageBody[1] + " not deleted reason: ",
+		Message:     "response:false;operation:delete;message:Directory " + messageBody[1] + " not deleted reason: ",
 	}
 
 	if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("File manager attempting to delete folder: "+messageBody[1])); err != nil {
@@ -128,7 +128,7 @@ func (listener ClientListener) actionDelete(connection *kernelModel.ClientConnec
 			Command:     kernelModel.CMD_SEND,
 			Source:      kernelModel.MD_FILES,
 			Destination: message.Source,
-			Message:     "response:true;File " + messageBody[1] + " deleted",
+			Message:     "response:true;operation:delete;message:Directory " + messageBody[1] + " deleted",
 		}
 		if err = kernelHandler.WriteServer(connection, &responseMessage); err != nil {
 			if err = listener.LogSystem.WriteLog(message.Destination, model.StringToLog("Response not sent to "+message.Source+" reason: "+err.Error())); err != nil {
