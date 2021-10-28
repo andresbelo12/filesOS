@@ -37,14 +37,14 @@ func (logSystem *LogSystem) DeleteFolder(folderName string) *model.OperationResp
 	response := model.OperationResponse{}
 
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		response.Message = "Create folder " + folderName + " failed because folder does not exist"
+		response.Message = "Delete folder " + folderName + " failed because folder does not exist"
 		response.Success = false
 	} else {
 		if err := os.RemoveAll(folderPath); err != nil {
-			response.Message = "Create folder " + folderName + " failed because: " + err.Error()
+			response.Message = "Delete folder " + folderName + " failed because: " + err.Error()
 			response.Success = false
 		} else {
-			response.Message = "Create folder " + folderName + " successful"
+			response.Message = "Delete folder " + folderName + " successful"
 			response.Success = true
 			logSystem.WorkspacePath = DefaultWorkspacePath
 		}

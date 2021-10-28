@@ -35,8 +35,6 @@ func (logSystem LogSystem) CreateLogFiles(firstLog model.Log) (err error) {
 			return err
 		}
 
-		logSystem.ModuleFiles[module] = moduleFile
-
 		if module == kernelModel.MD_FILES {
 			moduleFile.WriteString(firstLog.ToString())
 		}
@@ -47,11 +45,20 @@ func (logSystem LogSystem) CreateLogFiles(firstLog model.Log) (err error) {
 			moduleFile.WriteString(model.StringToLog("Kernel is initializing all modules").ToString())
 		}
 
+		logSystem.ModuleFiles[module] = moduleFile
+
 	}
 	return
 }
 
-func (logSystem LogSystem) WriteLog(fileName string, log model.Log) (err error) {
-	_, err = logSystem.ModuleFiles[fileName].WriteString(log.ToString())
+func (logSystem *LogSystem) ReadLogFile(moduleName string) (logs string, err error) {
+	buffer := make([]byte, 1024)
+	logSystem.ModuleFiles[moduleName].Read(buffer)
+	logs = logSystem.WorkspacePath + "/" + moduleName + "_LOGS.txt"
+	return
+}
+
+func (logSystem LogSystem) WriteLog(moduleName string, log model.Log) (err error) {
+	_, err = logSystem.ModuleFiles[moduleName].WriteString(log.ToString())
 	return
 }
